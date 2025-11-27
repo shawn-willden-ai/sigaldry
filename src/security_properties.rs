@@ -7,6 +7,15 @@
 /// number of security bits, or the year associated with the the confidentiality property.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SecurityProperty {
+    /// If provided, this property indicates that the operation uses a public/private key pair,
+    /// allowing the public key to be distriuted to other parties for encryption or verification.
+    /// If this property is not provided, the operation uses a symmetric key or a shared secret.
+    PublicPrivateKeyPair,
+
+    /// If provided, this property indicates that the operation uses a shared secret.
+    SharedSecret,
+    
+    /// If provided, this property indicates that the operation provides confidentiality of the
     /// Estimated number of security bits, assuming the key material is not compromised.
     /// 
     /// In the case of a symmetric block cipher with no known weaknesses and a uniform key
@@ -19,18 +28,44 @@ pub enum SecurityProperty {
     /// All security bit estimates are based on classical computing models, and may not apply to
     /// to quantum computing models.  To evaluate quantum computing resistance, examine the
     /// QuantumResistance property.
+    /// 
+    /// Note that during key generation, the caller will specify the desired minimum security
+    /// bits, but the actual security bits may be higher.  The actual estimate will be provided in
+    /// the property set of the key.
     SecurityBits(u16),
 
+    /// If provided, this property indicates that the operation can process a maximum number of
+    /// messages.  This is typically used to limit the number of messages that can be processed
+    /// by the operation, to prevent abuse or resource exhaustion.  For example, if the operation
+    /// is a symmetric encryption operation, the message limit is the maximum number of messages
+    /// that can be encrypted by the operation before security guarantees may be compromised.
+    /// 
+    /// Note that during key generation, the caller will specify the desired message limit, but the
+    /// actual message limit may be higher.  The actual estimate will be provided in the property
+    /// set of the key, and will decline as the key is used.
+    MessageLimit(MessageLimit),
+
+    /// If provided, this property indicates that the operation can process a maximum total amount
+    /// of data, in bytes.  This is used to limit the total amount of data that can be processed
+    /// by the operation.  For example, if the operation is a symmetric encryption operation, the
+    /// total data limit is the maximum total amount of data that can be encrypted by the
+    /// operation before security guarantees may be compromised.
+    /// 
+    /// Note that during key generation, the caller will specify the desired total data limit, but the
+    /// actual total data limit may be higher.  The actual estimate will be provided in the property
+    /// set of the key, and will decline as the key is used.
+    TotalDataLimit(TotalDataLimit),
+
     /// If provided, this property indicates that the operation provides confidentiality of the
-    /// data as long as the key is not compromised.
+    /// data.
     Confidentiality,
+
+    /// If provided, this property indicates that the operation ensures the integrity of the data.
+    Integrity,
 
     /// If provided, this property indicates that the operation provides authentication of the
     /// source of the data.
     Authentication(OriginIdentity),
-
-    /// If provided, this property indicates that the operation ensures the integrity of the data.
-    DataIntegrity,
 
     /// If provided, this property indicates that the operation's security is resistant to quantum
     /// computing attacks.
@@ -55,6 +90,18 @@ pub enum SecurityProperty {
     /// certification should not be included in the property set of an operation unless the
     /// certification applies to the operation.
     Certifications(Vec<SecurityCertification>)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum MessageLimit {
+    Unbounded,
+    Limited(u128),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum TotalDataLimit {
+    Unbounded,
+    Limited(u128),
 }
 
 /// Side channel resistances that can be exploited through software attacks, typically by

@@ -23,6 +23,8 @@ pub mod sponge_function;
 
 pub mod security_properties;
 
+pub mod construction;
+
 pub mod provider;
 
 pub trait CryptographicPrimitive {
