@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+
 use crate::CryptographicPrimitive;
 
 pub trait BlockTransformation: CryptographicPrimitive {
@@ -20,4 +22,3 @@ pub trait BlockCipherDecrypt: BlockTransformation {
 pub trait TweakableBlockTransformation: BlockTransformation {
     fn tweak_size(&self) -> usize;
 }
-
